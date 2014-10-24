@@ -14,28 +14,34 @@ func main() {
 
 	gpio := os.Args[1]
 
-	f, err := os.Create("/sys/class/gpio/export")
+	fexport, err := os.Create("/sys/class/gpio/export")
 	if err != nil {
 		panic(err)
 	}
 
-	f.WriteString(gpio)
+	defer fexport.Close()
 
-	f, err = os.Create(fmt.Sprintf("/sys/class/gpio/gpio%s/direction", gpio))
+	fexport.WriteString(gpio)
+
+	fdirection, err := os.Create(fmt.Sprintf("/sys/class/gpio/gpio%s/direction", gpio))
 	if err != nil {
 		panic(err)
 	}
 
-	f.WriteString("out")
+	defer fdirection.Close()
 
-	f, err = os.Create(fmt.Sprintf("/sys/class/gpio/gpio%s/value", gpio))
+	fdirection.WriteString("out")
+
+	fvalue, err := os.Create(fmt.Sprintf("/sys/class/gpio/gpio%s/value", gpio))
 	if err != nil {
 		panic(err)
 	}
 
-	f.WriteString("1")
+	defer fvalue.Close()
+
+	fvalue.WriteString("1")
 
 	time.Sleep(3 * time.Second)
 
-	f.WriteString("0")
+	fvalue.WriteString("0")
 }
